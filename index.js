@@ -27,13 +27,26 @@ function wixBinWrapper(exe, requiredArgs) {
 				cmd = 'wine';
 			}
 
-			var child = child_process.spawn(cmd, args);
-			child.on('error', function(err) {
-				reject(err);
-			});
+			var child = child_process.spawn(cmd, args),
+			    stdout = "", stderr = "";
+			
+			child.stdout.on("data", data => { stdout += String(data); });
+			child.stderr.on("data", data => { stderr += String(data); });
 
-			child.on('close', function() {
-				resolve();
+			child.on('error', reject);
+			child.on('close', function(code) {
+				if (code === 0) {
+					return resolve({ stdout: stdout, stderr: stderr });
+				}
+				
+				var err = new Error('WIX ' + exe + ' exited with code ' + code + (stderr ? "\n" + stderr : ""));
+				err.command = cmd;
+				err.args = args;
+				err.code = code;
+				err.stdout = stdout;
+				err.stderr = stderr;
+
+				reject(err);
 			});
 		});
 	}
