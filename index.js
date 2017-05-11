@@ -5,7 +5,7 @@ function wixBinWrapper(exe, requiredArgs) {
 	return function(/* arguments */) {
 		var args = [], opts = {};
 		for (var i = 0; i < arguments.length; i++) {
-			if (typeof arguments[i] === 'string') {
+			if (typeof arguments[i] === 'string' || typeof arguments[i] === 'number') {
 				args.push(arguments[i]);
 			} else if (typeof arguments[i] === 'object' && i === arguments.length-1) {
 				opts = arguments[i];
@@ -15,13 +15,14 @@ function wixBinWrapper(exe, requiredArgs) {
 		}
 
 		return new Promise(function(resolve, reject) {
-			var cmd = path.resolve(__dirname, 'wix-bin', exe);
-
-			for (var key in opts) {
-				args.unshift('-' + key + ' ' + opts[key]);
+			var cmd = path.resolve(__dirname, 'wix-bin', exe),
+			    optArgs = createArgsFromOptions(opts);
+			
+			if (optArgs.length) {
+				args = optArgs.concat(args);
 			}
 
-			if (process.platform != "win32") {
+			if (process.platform !== "win32") {
 				args.unshift(cmd);
 				cmd = 'wine';
 			}
@@ -35,6 +36,26 @@ function wixBinWrapper(exe, requiredArgs) {
 				resolve();
 			});
 		});
+	}
+}
+
+function createArgsFromOptions(opts) {
+	var args = [];
+	
+	for (var key in opts) {
+		addToArgs(args, key, opts[key]);
+	}
+	
+	return args;
+}
+
+function addToArgs(args, key, val) {
+	if (typeof val === 'string' || typeof val === 'number') {
+		args.push('-' + key, opts[key]);
+	} else if (typeof val === 'boolean' && val) {
+		args.push('-' + key);
+	} else if (Array.isArray(val)) {
+		val.forEach(function(v) { addToArgs(args, key, v); });
 	}
 }
 
@@ -52,5 +73,5 @@ module.exports = {
 	retina: wixBinWrapper('retina.exe'),
 	shine: wixBinWrapper('shine.exe'),
 	smoke: wixBinWrapper('smoke.exe'),
-	torch: wixBinWrapper('torch.exe'),
-}
+	torch: wixBinWrapper('torch.exe')
+};
