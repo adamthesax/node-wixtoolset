@@ -33,7 +33,8 @@ var request = http.get(WIX_BINARY_URL, function(response) {
 				fs.createReadStream(zipPath).pipe(unzip.Extract({path: path.resolve(__dirname, 'wix-bin')}));
 				console.log("Extraction complete")
 			}else{
-				console.log(`File verification failed:\nDownloaded file sha512: ${calculated_hash}`);
+				console.error(`File verification failed:\nDownloaded file sha512: ${calculated_hash}`);
+				process.exit(-1);
 			}
 		});
 		fstream.pipe(hash);
