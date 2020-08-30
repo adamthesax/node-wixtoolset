@@ -34,7 +34,11 @@ var request = http.get(WIX_BINARY_URL, function(response) {
 				console.log("Extraction complete")
 			}else{
 				console.error(`File verification failed:\nDownloaded file sha512: ${calculated_hash}`);
-				process.exit(-1);
+				fs.unlink(zipPath, function(err) {
+					if (err) throw err;
+					console.log('File deleted');
+					process.exit(-1);
+				});
 			}
 		});
 		fstream.pipe(hash);
