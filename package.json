@@ -11,11 +11,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "crypto": "^1.0.1",
     "unzip": "^0.1.11"
   },
-  "repository" :
-  { "type" : "git"
-  , "url" : "https://github.com/rewiredpictures/node-wixtoolset.git"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rewiredpictures/node-wixtoolset.git"
   }
-
 }
